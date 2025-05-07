@@ -26,6 +26,12 @@ Where:
 
 - [KernelSU KMI document](https://kernelsu.org/guide/installation.html#kmi)
 
+## Variation
+
+- **kmi.sh** - shell version, no magiskboot built-in, support Android/Linux, path required on Linux, support system boot image on Android (root required).
+- **kmi** - Android arm64, built-in magiskboot, support system boot image (root required).
+- **kmi-linux** - Linux x86_64, built-in magiskboot, path required.
+
 ## Acknowledgement
 
 - [Magisk](https://github.com/topjohnwu/Magisk): powerful magiskboot tool to extract data from boot image.

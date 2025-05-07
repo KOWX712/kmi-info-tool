@@ -13,6 +13,10 @@ if ! command -v magiskboot >/dev/null 2>&1; then
 fi
 
 if [ -z "$1" ]; then
+    if ! command -v getprop >/dev/null 2>&1; then
+        echo "Error: boot image not found, please provide /path/to/image."
+        exit 1
+    fi
     IMG="/dev/block/by-name/boot$(getprop ro.boot.slot_suffix)"
 else
     IMG="$1"

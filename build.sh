@@ -33,3 +33,9 @@ $NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clan
 
 echo "Build complete: kmi"
 
+# Build for Linux x86_64
+gcc -Wall -O2 -fPIC -fPIE -pie \
+    -DX86_64 \
+    -o "$OUTDIR/kmi-linux" main.c
+
+echo "Build complete: kmi-linux"

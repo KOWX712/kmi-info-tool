@@ -7,7 +7,11 @@
 #include <errno.h>
 #include <ctype.h>
 
+#ifdef X86_64
+#include "magiskboot_x86_64.h"
+#else
 #include "magiskboot_arm64-v8a.h"
+#endif
 
 int debug_mode = 0;
 #define DEBUG_LOG(fmt, ...) if (debug_mode) fprintf(stderr, "[DEBUG] " fmt "\n", ##__VA_ARGS__)
@@ -253,6 +257,10 @@ int main(int argc, char *argv[]) {
         DEBUG_LOG("Using provided boot image path: %s", argv[1]);
         snprintf(img_path, sizeof(img_path), "%s", argv[1]);
     } else {
+#ifdef X86_64
+        printf("Error: no boot image provided!\n");
+        return 1;
+#endif
         char buf[256] = "";
         FILE *fp = popen("getprop ro.boot.slot_suffix", "r");
         if (fp) {
