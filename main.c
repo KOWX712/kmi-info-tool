@@ -279,6 +279,18 @@ int main(int argc, char *argv[]) {
         perror("getcwd() error");
         return 1;
     }
+    DEBUG_LOG("Current work directory: %s", cwd);
+
+#ifdef ANDROID
+    if (strcmp(cwd, "/") == 0) {
+        if (chdir("/data/local/tmp") != 0) {
+            perror("Failed to change directory to /data/local/tmp");
+            return 1;
+        }
+        strcpy(cwd, "/data/local/tmp");
+        DEBUG_LOG("New work directory: %s", cwd);
+    }
+#endif
 
     // Construct magiskboot path
     snprintf(mb_path, sizeof(mb_path), "%s/magiskboot", cwd);
