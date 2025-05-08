@@ -133,6 +133,12 @@ char* find_linux_version(const char* filename) {
                 }
                 result[result_len] = '\0';
 
+                // Check if the match contains a version number and other relevant details
+                if (strstr(result, "Linux version") && strstr(result, "SMP") && strstr(result, "PREEMPT")) {
+                    fclose(file);
+                    return result;
+                }
+
                 // Keep longest string
                 if (result_len > longest_len) {
                     longest_len = result_len;
