@@ -17,7 +17,7 @@
 #endif
 
 int debug_mode = 0;
-#define DEBUG_LOG(fmt, ...) if (debug_mode) fprintf(stderr, "[DEBUG] " fmt "\n", ##__VA_ARGS__)
+#define DEBUG_LOG(fmt, ...) if (debug_mode) fprintf(stderr, "\033[0;36m[DEBUG]\033[0m " fmt "\n", ##__VA_ARGS__)
 
 // Write magiskboot binary
 void write_magiskboot(const char *path) {
@@ -25,15 +25,12 @@ void write_magiskboot(const char *path) {
     int fd = open(path, O_CREAT | O_WRONLY, 0755);
     ssize_t written = write(fd, magiskboot, magiskboot_len);
     if (written != magiskboot_len) {
-        DEBUG_LOG("ERROR: Failed to write all data: %ld of %u bytes", 
-                 written, magiskboot_len);
-        fprintf(stderr, "Error: Failed to write magiskboot binary\n");
+        fprintf(stderr, "\033[0;31m[ERROR]\033[0m Failed to write magiskboot binary\n");
         close(fd);
         exit(1);
     }
 
     close(fd);
-    DEBUG_LOG("Successfully wrote magiskboot binary");
 }
 
 /**
@@ -105,7 +102,6 @@ char* find_linux_version(const char* filename) {
         return "";
     }
 
-    DEBUG_LOG("File opened successfully");
     char buffer[8192];
     const char* pattern = "Linux version ";
     int pattern_len = strlen(pattern);
@@ -149,7 +145,6 @@ char* find_linux_version(const char* filename) {
     fclose(file);
 
     // Return the longest match found
-    DEBUG_LOG("Final longest match: %s", longest_match[0] ? longest_match : "(none)");
     return longest_match[0] ? longest_match : "";
 }
 
@@ -249,8 +244,6 @@ int main(int argc, char *argv[]) {
     // Enable debug log when first arg is debug
     if (argc > 1 && strcmp(argv[1], "debug") == 0) {
         debug_mode = 1;
-        DEBUG_LOG("Debug mode enabled");
-
         argc--;
         argv++;
     }
@@ -269,7 +262,7 @@ int main(int argc, char *argv[]) {
         snprintf(img_path, sizeof(img_path), "/dev/block/by-name/boot%s", buf);
         DEBUG_LOG("Using default boot image path: %s", img_path);
 #else
-        printf("Error: no boot image provided!\n");
+        printf("\033[0;31m[ERROR]\033[0m no boot image provided!\n");
         return 1;
 #endif
     }
@@ -314,10 +307,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if kernel exists
-    DEBUG_LOG("Checking if kernel file exists");
     if (!file_exists_and_not_empty("kernel")) {
         DEBUG_LOG("Kernel file not found or empty");
-        fprintf(stderr, "Error: Invalid boot image\n");
+        fprintf(stderr, "\033[0;31m[ERROR]\033[0m Invalid boot image\n");
         goto cleanup;
     }
 
@@ -330,7 +322,6 @@ int main(int argc, char *argv[]) {
     }
 
     // Get kernel version
-    DEBUG_LOG("Extracting kernel version");
     char* linux_ver = find_linux_version("kernel");
     char* kernel_ver = extract_kernel_version(linux_ver);
     if (!kernel_ver || !*kernel_ver) {
@@ -341,26 +332,22 @@ int main(int argc, char *argv[]) {
     }
 
     // Get security patch level
-    DEBUG_LOG("Getting security patch level");
     char* security_path_line = find_in_file("info", "OS_PATCH_LEVEL");
-    DEBUG_LOG("Security patch line: %s", security_path_line ? security_path_line : "NULL");
-    
-    // Copy the security patch value to a separate buffer
     char* temp = extract_bracketed_value(security_path_line);
-    DEBUG_LOG("Extracted security patch value: '%s'", temp);
+    DEBUG_LOG("Extracted security patch: %s", temp);
+
+    // Copy the security patch value to a separate buffer
     if (temp && temp[0]) {
         strncpy(security_patch, temp, sizeof(security_patch) - 1);
         security_patch[sizeof(security_patch) - 1] = '\0';
     }
-    DEBUG_LOG("Final security patch: %s", security_patch);
-    
+
     // Get compression format
-    DEBUG_LOG("Getting compression format");
     char* compression_line = find_in_file("info", "KERNEL_FMT");
     char comp_format[32] = "";
     temp = extract_bracketed_value(compression_line);
-    DEBUG_LOG("Compression format raw: %s", temp);
-    
+    DEBUG_LOG("Compression format: %s", temp);
+
     // Copy compression format to a separate buffer
     if (temp && temp[0]) {
         strncpy(comp_format, temp, sizeof(comp_format) - 1);
@@ -379,15 +366,15 @@ int main(int argc, char *argv[]) {
         strcpy(compression, "-lz4");
     } else if (comp_format[0]) {
         DEBUG_LOG("%s format", comp_format);
-        printf("Warning: kernel compression format is %s, please use AnyKernel3.zip\n", comp_format);
+        printf("\033[0;34m[NOTES]\033[0m kernel compression format is %s, please use AnyKernel3.zip\n", comp_format);
         snprintf(compression, sizeof(compression), "-%s", comp_format);
     } else {
         DEBUG_LOG("Empty compression format, using empty string");
         strcpy(compression, "");
     }
-    DEBUG_LOG("Compression string: %s", compression);
+    DEBUG_LOG("Compression string: '%s'", compression);
 
-    printf("KMI: %s_%s-boot%s\n", kernel_ver, security_patch, compression);
+    printf("\033[0;33m[ KMI ]\033[0m %s_%s-boot%s\n", kernel_ver, security_patch, compression);
 
 cleanup:
     // Cleanup
@@ -404,6 +391,5 @@ cleanup:
     }
     unlink(mb_path);
 
-    DEBUG_LOG("Done");
     return 0;
 }
