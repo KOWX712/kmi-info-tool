@@ -6,10 +6,13 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <ctype.h>
+#ifdef ANDROID
+#include <sys/system_properties.h>
+#endif
 
 #ifdef X86_64
 #include "magiskboot_x86_64.h"
-#else
+#elif ARM64
 #include "magiskboot_arm64-v8a.h"
 #endif
 
@@ -257,22 +260,18 @@ int main(int argc, char *argv[]) {
         DEBUG_LOG("Using provided boot image path: %s", argv[1]);
         snprintf(img_path, sizeof(img_path), "%s", argv[1]);
     } else {
-#ifdef X86_64
-        printf("Error: no boot image provided!\n");
-        return 1;
-#endif
+#ifdef ANDROID
         char buf[256] = "";
-        FILE *fp = popen("getprop ro.boot.slot_suffix", "r");
-        if (fp) {
-            if (fgets(buf, sizeof(buf), fp)) {
-                buf[strcspn(buf, "\n")] = 0;
-                DEBUG_LOG("Slot suffix: %s", buf);
-            }
-            pclose(fp);
+        if (__system_property_get("ro.boot.slot_suffix", buf) > 0) {
+            DEBUG_LOG("Slot suffix: %s", buf);
         }
 
         snprintf(img_path, sizeof(img_path), "/dev/block/by-name/boot%s", buf);
         DEBUG_LOG("Using default boot image path: %s", img_path);
+#else
+        printf("Error: no boot image provided!\n");
+        return 1;
+#endif
     }
 
     // Get current working directory

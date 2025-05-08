@@ -29,13 +29,14 @@ rm -rf "$OUTDIR/"*
 # Build for android arm64
 $NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang \
     -Wall -O2 -fPIC -fPIE -pie \
+    -DANDROID -DARM64 \
     -o "$OUTDIR/kmi" main.c
 
-echo "Build complete: kmi"
+[ -f "$OUTDIR/kmi" ] && echo "Build complete: kmi"
 
 # Build for Linux x86_64
 gcc -Wall -O2 -fPIC -fPIE -pie \
-    -DX86_64 \
+    -DLINUX -DX86_64 \
     -o "$OUTDIR/kmi-linux" main.c
 
-echo "Build complete: kmi-linux"
+[ -f "$OUTDIR/kmi-linux" ] && echo "Build complete: kmi-linux"
