@@ -390,11 +390,8 @@ cleanup:
     if (ret != 0) {
         DEBUG_LOG("Cleanup command failed with return code %d", ret);
     }
-    
-    ret = system("rm -f info");
-    if (ret != 0) {
-        DEBUG_LOG("Failed to remove info file, return code %d", ret);
-    }
+
+    unlink("info");
     unlink(mb_path);
 
     return 0;
