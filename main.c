@@ -364,15 +364,8 @@ int main(int argc, char *argv[]) {
     if (strcmp(comp_format, "raw") == 0) {
         DEBUG_LOG("Raw format, using empty string");
         strcpy(compression, "");
-    } else if (strcmp(comp_format, "gzip") == 0) {
-        DEBUG_LOG("gzip format");
-        strcpy(compression, "-gz");
-    } else if (strcmp(comp_format, "lz4") == 0) {
-        DEBUG_LOG("lz4 format");
-        strcpy(compression, "-lz4");
     } else if (comp_format[0]) {
         DEBUG_LOG("%s format", comp_format);
-        printf("\033[0;34m[NOTES]\033[0m kernel compression format is %s, please use AnyKernel3.zip\n", comp_format);
         snprintf(compression, sizeof(compression), "-%s", comp_format);
     } else {
         DEBUG_LOG("Empty compression format, using empty string");

@@ -34,12 +34,7 @@ COMPRESSION=$(grep "KERNEL_FMT" info | awk -F'[][]' '{print $2}')
 
 if [ "$COMPRESSION" = "raw" ]; then
     COMPRESSION=""
-elif [ "$COMPRESSION" = "gzip" ]; then
-    COMPRESSION="-gz"
-elif [ "$COMPRESSION" = "lz4" ]; then
-    COMPRESSION="-lz4"
 else
-    echo "Warning: kernel compression format is $COMPRESSION, please use AnyKernel3.zip"
     COMPRESSION="-$COMPRESSION"
 fi
 
