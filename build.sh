@@ -4,10 +4,14 @@
 
 DIR=$(pwd)
 OUTDIR="$DIR/out"
-NDK_HOME="$DIR/android-ndk"
 
-# Custom ndk path
-# NDK_HOME=/path/to/android-ndk
+if [ -d "/opt/android-ndk" ]; then
+    echo "Using system NDK path: /opt/android-ndk"
+    NDK_HOME="/opt/android-ndk"
+else
+    echo "Using default NDK path: $DIR/android-ndk"
+    NDK_HOME="$DIR/android-ndk"
+fi
 
 if [ ! -d "$NDK_HOME" ]; then
     LATEST_NDK_URL=$(curl -s https://developer.android.com/ndk/downloads | grep -oP 'https://dl.google.com/android/repository/android-ndk-r[0-9]+[a-z]?-linux\.zip' | head -n 1)
