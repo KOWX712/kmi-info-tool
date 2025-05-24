@@ -25,9 +25,6 @@ fi
 # Unpack boot image
 magiskboot unpack "$IMG" > info 2>&1
 
-# Decompress kernel
-magiskboot decompress kernel >/dev/null 2>&1
-
 # Get security patch level and kernel compression format
 SECURITY_PATH=$(grep "OS_PATCH_LEVEL" info | awk -F'[][]' '{print $2}')
 COMPRESSION=$(grep "KERNEL_FMT" info | awk -F'[][]' '{print $2}')

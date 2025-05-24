@@ -319,14 +319,6 @@ int main(int argc, char *argv[]) {
         goto cleanup;
     }
 
-    // Decompress kernel
-    DEBUG_LOG("Decompressing kernel");
-    snprintf(cmd, sizeof(cmd), "%s decompress kernel 2>/dev/null", mb_path);
-    ret = system(cmd);
-    if (ret != 0) {
-        DEBUG_LOG("Kernel decompression failed with return code %d", ret);
-    }
-
     // Get kernel version
     char* linux_ver = find_linux_version("kernel");
     char* kernel_ver = extract_kernel_version(linux_ver);
