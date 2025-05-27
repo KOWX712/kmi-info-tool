@@ -236,6 +236,13 @@ char* extract_kernel_version(const char* linux_ver) {
     return result;
 }
 
+void print_usage() {
+    printf("Usage: kmi [/path/to/boot.img]\n");
+    printf("Options:\n");
+    printf("  debug\t\tEnable debug logging\n");
+    printf("  --help\tShow this help message\n");
+}
+
 int main(int argc, char *argv[]) {
     DEBUG_LOG("Starting kmi_info (dynamic version)");
 
@@ -252,6 +259,9 @@ int main(int argc, char *argv[]) {
         debug_mode = 1;
         argc--;
         argv++;
+    } else if (argc > 1 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
+        print_usage();
+        return 0;
     }
 
     // Get boot image path
@@ -268,9 +278,17 @@ int main(int argc, char *argv[]) {
         snprintf(img_path, sizeof(img_path), "/dev/block/by-name/boot%s", buf);
         DEBUG_LOG("Using default boot image path: %s", img_path);
 #else
-        printf("\033[0;31m[ERROR]\033[0m no boot image provided!\n");
+        fprintf(stderr, "\033[0;31m[ERROR]\033[0m no boot image provided!\n");
+        print_usage();
         return 1;
 #endif
+    }
+
+    // Verify if boot image is accessible
+    if (access(img_path, R_OK) != 0) {
+        fprintf(stderr, "\033[0;31m[ERROR]\033[0m Cannot access boot image: %s\n", img_path);
+        print_usage();
+        return 1;
     }
 
     // Get current working directory
@@ -356,6 +374,9 @@ int main(int argc, char *argv[]) {
     if (strcmp(comp_format, "raw") == 0) {
         DEBUG_LOG("Raw format, using empty string");
         strcpy(compression, "");
+    } else if (strcmp(comp_format, "gzip") == 0) {
+        DEBUG_LOG("%s format", comp_format);
+        strcpy(compression, "-gz");
     } else if (comp_format[0]) {
         DEBUG_LOG("%s format", comp_format);
         snprintf(compression, sizeof(compression), "-%s", comp_format);
