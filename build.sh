@@ -27,19 +27,25 @@ if [ ! -d "$NDK_HOME" ]; then
     rm -rf "$TEMP_DIR" "$NDK_ZIP"
 fi
 
+# Check magiskboot
+if [[ ! -f "magiskboot_arm64-v8a.h" || ! -f "magiskboot_x86_64.h" ]]; then
+    chmod +x magiskboot.sh
+    ./magiskboot.sh
+fi
+
 mkdir -p "$OUTDIR"
 rm -rf "$OUTDIR/"*
 
 # Build for android arm64
 $NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang \
-    -Wall -O2 -fPIC -fPIE -pie \
+    -Wall -O2 -fPIC -fPIE -pie -s \
     -DANDROID -DARM64 \
     -o "$OUTDIR/kmi" main.c
 
 [ -f "$OUTDIR/kmi" ] && echo "Build complete: kmi"
 
 # Build for Linux x86_64
-gcc -Wall -O2 -fPIC -fPIE -pie \
+gcc -Wall -O2 -fPIC -fPIE -pie -s \
     -DLINUX -DX86_64 \
     -o "$OUTDIR/kmi-linux" main.c
 

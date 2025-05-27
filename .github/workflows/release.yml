@@ -14,9 +14,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-    
+
+      - name: Install UPX
+        run: sudo apt-get update && sudo apt-get install -y upx
+
       - name: Build
-        run: ./build.sh
+        run: chmod +x build.sh && ./build.sh
 
       - name: Create release
         uses: softprops/action-gh-release@v2

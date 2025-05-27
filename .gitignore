@@ -1,3 +1,4 @@
 .vscode
 out
 android-ndk
+magiskboot_*.h
