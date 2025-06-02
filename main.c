@@ -10,8 +10,10 @@
 
 #ifdef X86_64
 #include "magiskboot_x86_64.h"
-#elif ARM64
+#define PLATFORM    "x86_64"
+#elif AARCH64
 #include "magiskboot_arm64-v8a.h"
+#define PLATFORM    "arm64-v8a"
 #endif
 
 int debug_mode = 0;
@@ -235,7 +237,7 @@ char* extract_kernel_version(const char* linux_ver) {
 }
 
 void print_usage() {
-    printf("kmi %s (%s) %s\n", VERSION, PLATFORM, DATE);
+    printf("kmi %s (%s-android-linux) %s\n", VERSION, PLATFORM, DATE);
     printf("Usage: kmi [/path/to/boot.img]\n");
     printf("Options:\n");
     printf("  -d, --debug\tEnable debug logging\n");

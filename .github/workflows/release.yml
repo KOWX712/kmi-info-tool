@@ -18,8 +18,24 @@ jobs:
       - name: Install UPX
         run: sudo apt-get update && sudo apt-get install -y upx
 
+      - name: Download android-ndk
+        run: |
+          LATEST_NDK_URL=$(curl -s https://developer.android.com/ndk/downloads | grep -oP 'https://dl.google.com/android/repository/android-ndk-r[0-9]+[a-z]?-linux\.zip' | head -n 1)
+          [ -z "$LATEST_NDK_URL" ] && LATEST_NDK_URL="https://dl.google.com/android/repository/android-ndk-r27c-linux.zip"
+          wget -q "$LATEST_NDK_URL" -O android-ndk.zip
+          TEMP_DIR=$(mktemp -d)
+          unzip -q android-ndk.zip -d "$TEMP_DIR"
+          EXTRACTED_DIR=$(find "$TEMP_DIR" -maxdepth 1 -name "android-ndk-*" -type d | head -n 1)
+          mv -f "$EXTRACTED_DIR" android-ndk
+
+      - name: Download magiskboot
+        run: chmod +x magiskboot.sh && ./magiskboot.sh
+
       - name: Build
-        run: chmod +x build.sh && ./build.sh
+        run: |
+          DIR="$(pwd)"
+          export PATH="$DIR/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+          make all
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -29,4 +45,3 @@ jobs:
           files: |
             out/*
             kmi.sh
-          draft: false
