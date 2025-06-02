@@ -29,8 +29,7 @@ Where:
 ## Variation
 
 - **kmi.sh** - shell version, no magiskboot built-in, support Android/Linux, path required on Linux, support system boot image on Android (root required).
-- **kmi** - Android arm64, built-in magiskboot, support system boot image (root required).
-- **kmi-linux** - Linux x86_64, built-in magiskboot, path required.
+- **kmi** - android-linux universal binary, support system boot image in android (root required).
 
 ## Acknowledgement
 
