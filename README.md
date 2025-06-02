@@ -8,7 +8,7 @@ A simple tool to extract Kernel Module Interface (KMI) information from Android 
 chmod +x kmi
 ./kmi                       # Show kmi of system active slot, e.g.: /dev/block/by-name/boot_a
 ./kmi </path/to/boot.img>   # Show kmi of provided image
-./kmi debug                 # Show verbose log
+./kmi --debug               # Show verbose log
 ```
 
 ### Example output

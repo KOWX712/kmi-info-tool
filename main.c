@@ -6,9 +6,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <ctype.h>
-#ifdef ANDROID
 #include <sys/system_properties.h>
-#endif
 
 #ifdef X86_64
 #include "magiskboot_x86_64.h"
@@ -237,10 +235,11 @@ char* extract_kernel_version(const char* linux_ver) {
 }
 
 void print_usage() {
+    printf("kmi %s (%s) %s\n", VERSION, PLATFORM, DATE);
     printf("Usage: kmi [/path/to/boot.img]\n");
     printf("Options:\n");
-    printf("  debug\t\tEnable debug logging\n");
-    printf("  --help\tShow this help message\n");
+    printf("  -d, --debug\tEnable debug logging\n");
+    printf("  -h, --help\tShow this help message\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -255,7 +254,7 @@ int main(int argc, char *argv[]) {
     int ret;
 
     // Enable debug log when first arg is debug
-    if (argc > 1 && strcmp(argv[1], "debug") == 0) {
+    if (argc > 1 && (strcmp(argv[1], "--debug") == 0 || strcmp(argv[1], "-d") == 0)) {
         debug_mode = 1;
         argc--;
         argv++;
@@ -269,19 +268,17 @@ int main(int argc, char *argv[]) {
         DEBUG_LOG("Using provided boot image path: %s", argv[1]);
         snprintf(img_path, sizeof(img_path), "%s", argv[1]);
     } else {
-#ifdef ANDROID
         char buf[256] = "";
         if (__system_property_get("ro.boot.slot_suffix", buf) > 0) {
             DEBUG_LOG("Slot suffix: %s", buf);
-        }
 
-        snprintf(img_path, sizeof(img_path), "/dev/block/by-name/boot%s", buf);
-        DEBUG_LOG("Using default boot image path: %s", img_path);
-#else
-        fprintf(stderr, "\033[0;31m[ERROR]\033[0m no boot image provided!\n");
-        print_usage();
-        return 1;
-#endif
+            snprintf(img_path, sizeof(img_path), "/dev/block/by-name/boot%s", buf);
+            DEBUG_LOG("Using default boot image path: %s", img_path);
+        } else {
+            fprintf(stderr, "\033[0;31m[ERROR]\033[0m no boot image provided!\n");
+            print_usage();
+            return 1;
+        }
     }
 
     // Verify if boot image is accessible
@@ -298,16 +295,20 @@ int main(int argc, char *argv[]) {
     }
     DEBUG_LOG("Current work directory: %s", cwd);
 
-#ifdef ANDROID
     if (strcmp(cwd, "/") == 0) {
-        if (chdir("/data/local/tmp") != 0) {
-            perror("Failed to change directory to /data/local/tmp");
-            return 1;
+        const char *target_dir = NULL;
+        target_dir = getenv("HOME");
+        if (target_dir && chdir(target_dir) == 0) {
+            DEBUG_LOG("New work directory: %s\n", target_dir);
+            return 0;
         }
-        strcpy(cwd, "/data/local/tmp");
-        DEBUG_LOG("New work directory: %s", cwd);
+        if (chdir("/data/local/tmp") == 0) {
+            DEBUG_LOG("New work directory: /data/local/tmp\n");
+            return 0;
+        }
+        perror("chdir() error");
+        return 1;
     }
-#endif
 
     // Construct magiskboot path
     snprintf(mb_path, sizeof(mb_path), "%s/magiskboot", cwd);

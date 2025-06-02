@@ -36,17 +36,24 @@ fi
 mkdir -p "$OUTDIR"
 rm -rf "$OUTDIR/"*
 
-# Build for android arm64
-$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang \
-    -Wall -O2 -fPIC -fPIE -pie -s \
-    -DANDROID -DARM64 \
-    -o "$OUTDIR/kmi" main.c
+git fetch --tags
+VERSION=$(git describe --tags --abbrev=0)
+DATE=$(date +"%Y-%m-%d")
 
-[ -f "$OUTDIR/kmi" ] && echo "Build complete: kmi"
+# Build for android arm64
+$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang \
+    -Wall -O2 -static -s \
+    -DARM64 \
+    -DVERSION="\"$VERSION\"" \
+    -DPLATFORM="\"aarch64-linux-android\"" \
+    -DDATE="\"$DATE\"" \
+    -o "$OUTDIR/kmi-arm64-v8a" main.c
 
 # Build for Linux x86_64
-gcc -Wall -O2 -fPIC -fPIE -pie -s \
-    -DLINUX -DX86_64 \
-    -o "$OUTDIR/kmi-linux" main.c
-
-[ -f "$OUTDIR/kmi-linux" ] && echo "Build complete: kmi-linux"
+$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android29-clang \
+    -Wall -O2 -static -s \
+    -DX86_64 \
+    -DVERSION="\"$VERSION\"" \
+    -DPLATFORM="\"x86_64-linux-android\"" \
+    -DDATE="\"$DATE\"" \
+    -o "$OUTDIR/kmi-x86_64" main.c
